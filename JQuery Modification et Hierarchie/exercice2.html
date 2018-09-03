@@ -14,21 +14,59 @@
         <div class="col-6">
             <h3>Ajouter un utilisateur</h3>
             <form id="ajoutUtilisateur">
-
+                <div class="form-group">
+                    <label>Nom</label>
+                    <input name="nom" placeholder="Nom" class="form-control"/>
+                    <small class="text-danger" for="nom">Le champs est vide.</small>
+                </div>
+                <div class="form-group">
+                    <label>Prénom</label>
+                    <input name="prenom" placeholder="Prénom" class="form-control"/>
+                    <small class="text-danger" for="prenom">Le champs est vide.</small>
+                </div>
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input name="email" placeholder="E-mail" class="form-control"/>
+                    <small class="text-danger" for="email">Le champs est vide.</small>
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input name="password" type="password" placeholder="Mot de passe" class="form-control"/>
+                    <small class="text-danger" for="password">Le champs est vide.</small>
+                </div>
+                <div class="form-group">
+                    <small id="emailUnique" class="text-danger erreur">L'email existe déjà.</small><br>
+                    <button class="right btn btn-success">Ajouter</button>
+                </div>
             </form>
             <hr>
             <h3>Supprimer un utilisateur</h3>
-            <select id="suppressionUtilisateur">
+            <select class="form-control" id="suppressionUtilisateur">
 
             </select>
+            <button class="btn btn-block btn-danger" id="supressionUtilisateurButton" disabled>Supprimer</button>
             <hr>
             <h3>Connection utilisateur</h3>
             <form id="connection">
-
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input name="email" placeholder="E-mail" class="form-control"/>
+                    <small for="email" class="text-danger">L'email est invalide.</small>
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input name="password" type="password" placeholder="Mot de passe" class="form-control"/>
+                    <small for="password" class="text-danger">Le mot de passe est invalide.</small>
+                </div>
+                <div class="form-group">
+                    <small class="text-danger">Connection impossible.</small><br>
+                    <small class="text-success">Bonjour <span id="nomSuccessMessage"></span> <span id="prenomSuccessMessage"></span></small><br>
+                    <button class="right btn btn-success">Se connecter</button>
+                </div>
             </form>
         </div>
         <div class="col-6">
-            <table>
+            <table class="table">
                 <thead>
                     <tr>
                         <th>Nom</th>
@@ -38,12 +76,6 @@
                     </tr>
                 </thead>
                 <tbody id="listeUtilisateur">
-                    <tr>
-                        <td>Smith</td>
-                        <td>John</td>
-                        <td>smith.john@gmail.com</td>
-                        <td>*****</td>
-                    </tr>
                 </tbody>
             </table>
         </div>
@@ -51,13 +83,146 @@
 
 </div>
 <!-- JS -->
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script>
 
-$(function() {
 
+
+$(function() {
+    // On cache tout les small car ils sont utilisé pour les erreurs/succès des formulaires
+    $("small").hide();
+
+    // Lorsqu'on valide le formulaire d'ajout d'utilisateur
+    $("#ajoutUtilisateur").submit(function(e) {
+        e.preventDefault();
+
+        // On cache les smalls du formulaire pour réinitialisé les erreurs
+        $("#ajoutUtilisateur small").hide();
+        // On récupère l'e-mail pour être sur qu'elle soit unique
+        var emailValue = $("#ajoutUtilisateur input[name='email']").val();
+        // Variable qui check si c'est unique ou pas au niveau de l'image
+        var unique = true;
+
+        // On recherche dans toutes les td si il y en a qui containe l'email
+        $("td:contains('" + emailValue + "')").each(function() {
+            // On vérifie une deuxieme fois due au comportement de contains
+            if (emailValue == $(this).html()) {
+                // Ce n'est pas unique, on quitte.
+                unique = false;
+                return false;
+            }
+        });
+        // On affiche le message d'erreur si l'email existe déjà
+        if (unique == false) {
+            $("#emailUnique").show();
+            return;
+        }
+
+        // Création d'une nouvelle tr
+        var newTr = $("<tr></tr>");
+
+        // Variable permettant de vérifier les erreurs
+        var aErreur = false;
+        $("#ajoutUtilisateur input[name]").each(function() {
+            // Si le champs est vide
+            if ($(this).val() == "") {
+                // On met l'erreur à vrai
+                aErreur = true;
+                // On affiche l'erreur
+                $("small[for=" + $(this).attr('name') + "]").show();
+            }
+            // Sinon
+            else {
+                // On créé une nouvelle td
+                var newTd = $("<td></td>");
+                // On récupère la valeur de notre champs
+                var value = $(this).val();
+                // On créé la variable qui sera "affiché"
+                var displayValue = value;
+                // Si c'est un type "password" on cache le mot de passe
+                if ($(this).attr('type') == 'password') {
+                    displayValue = displayValue.replace(/./g, '*');
+                }
+                // On ajoute dans les données de chaqu'une des td la valeur réel
+                newTd.data('realValue', value);
+                // On met la valeur html dans notre td
+                newTd.html(displayValue)
+                // On ajoute la td à la tr
+                newTr.append(newTd);
+            }
+        });
+        // Si il y a une erreur, on s'arrête la.
+        if (aErreur) {
+            return;
+        }
+        // Début de l'animation d'ajout
+        newTr.hide();
+        // On ajoute la novuelle tr à notre liste
+        $("#listeUtilisateur").append(newTr);
+        // On anime son ajout avec fadeIn
+        newTr.fadeIn(200);
+
+        // On ajoute notre option à notre suppression d'utilisateur
+        $("#suppressionUtilisateur").append("<option value=" + emailValue + ">"
+                                            + newTr.find('td').eq(0).html()
+                                            + ' '
+                                            + newTr.find('td').eq(1).html()
+                                            + "</option>");
+        // On active notre bouton
+        $("#supressionUtilisateurButton").prop('disabled', false);
+    });
+    // Si on se connecte
+    $("#connection").submit(function (e) {
+        e.preventDefault();
+        $("#connection small").hide();
+        var emailValue = $("#connection [name='email']").val();
+        var passwordValue = $("#connection [name='password']").val();
+        var estValide = false;
+        var nom = "";
+        var prenom = "";
+        if (emailValue == '') {
+            $("#connection small[for='email']").show();
+        }
+        if (passwordValue == '') {
+            $("#connection small[for='password']").show();
+        }
+        $("td:contains('" + emailValue + "')").each(function() {
+            if (emailValue == $(this).html()) {
+                if ($(this).nextAll().last().data('realValue') == passwordValue) {
+                    estValide = true;
+                    nom = $(this).parent().find('td').eq(0).html();
+                    prenom = $(this).parent().find('td').eq(1).html();
+                }
+            }
+        });
+        if (estValide) {
+            $("#connection .text-success").show();
+            $("#nomSuccessMessage").html(nom);
+            $("#prenomSuccessMessage").html(prenom);
+        }
+        else {
+            $("#connection .text-danger").last().show();
+        }
+    });
+
+    $("#supressionUtilisateurButton").click(function() {
+        var emailValue = $("#suppressionUtilisateur").val();
+        $("td:contains('" + emailValue + "')").each(function() {
+            if (emailValue == $(this).html()) {
+                $("#suppressionUtilisateur option[value='" + emailValue + "']").remove();
+                var parentToDelete = $(this).parent();
+                parentToDelete.fadeOut(200, function() {
+                    parentToDelete.remove();
+                });
+
+                $("#supressionUtilisateurButton").prop('disabled', $("#suppressionUtilisateur option").length == 0);
+                return false;
+            }
+        });
+    });
 })
 
 </script>

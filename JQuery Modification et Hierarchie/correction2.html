@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>JQuery Modification et Hierarchie</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+<div class="container content">
+    <div class="row">
+        <div class="col-6">
+            <h3>Ajouter un utilisateur</h3>
+            <form id="ajoutUtilisateur">
+                <div class="form-group">
+                    <label>Nom</label>
+                    <input name="nom" placeholder="Nom" class="form-control"/>
+                    <small class="text-danger" for="nom">Le champs est vide.</small>
+                </div>
+                <div class="form-group">
+                    <label>Prénom</label>
+                    <input name="prenom" placeholder="Prénom" class="form-control"/>
+                    <small class="text-danger" for="prenom">Le champs est vide.</small>
+                </div>
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input name="email" placeholder="E-mail" class="form-control"/>
+                    <small class="text-danger" for="email">Le champs est vide.</small>
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input name="password" type="password" placeholder="Mot de passe" class="form-control"/>
+                    <small class="text-danger" for="password">Le champs est vide.</small>
+                </div>
+                <div class="form-group">
+                    <small id="emailUnique" class="text-danger erreur">L'email existe déjà.</small><br>
+                    <button class="right btn btn-success">Ajouter</button>
+                </div>
+            </form>
+            <hr>
+            <h3>Supprimer un utilisateur</h3>
+            <select class="form-control" id="suppressionUtilisateur">
+
+            </select>
+            <button class="btn btn-block btn-danger" id="suppressionUtilisateurButton" disabled>Supprimer</button>
+            <hr>
+            <h3>Connection utilisateur</h3>
+            <form id="connection">
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input name="email" placeholder="E-mail" class="form-control"/>
+                    <small for="email" class="text-danger">L'email est invalide.</small>
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input name="password" type="password" placeholder="Mot de passe" class="form-control"/>
+                    <small for="password" class="text-danger">Le mot de passe est invalide.</small>
+                </div>
+                <div class="form-group">
+                    <small class="text-danger">Connection impossible.</small><br>
+                    <small class="text-success">Bonjour <span id="nomSuccessMessage"></span> <span id="prenomSuccessMessage"></span></small><br>
+                    <button class="right btn btn-success">Se connecter</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-6">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Email</th>
+                        <th>Mot de passe</th>
+                    </tr>
+
+
+                </thead>
+                <tbody id="listeUtilisateur">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script>
+
+var utilisateurs = [];
+
+$(function() {
+    $("small").hide();
+
+    $("#ajoutUtilisateur").submit(function(e) {
+        e.preventDefault();
+
+        var newUtilisateur = {};
+        var erreur = false;
+        $("#ajoutUtilisateur input[name]").each(function() {
+            if ($(this).val() == '') {
+                erreur = true;
+                $("#ajoutUtilisateur small[for='" + $(this).attr('name') + "']").show();
+            }
+            newUtilisateur[$(this).attr('name')] = $(this).val();
+        });
+        if (erreur) {
+            return;
+        }
+        utilisateurs.push(newUtilisateur);
+        var newTr = $("<tr></tr>");
+        newTr.append('<td>' + newUtilisateur['nom'] + '</td>');
+        newTr.append('<td>' + newUtilisateur['prenom'] + '</td>');
+        newTr.append('<td>' + newUtilisateur['email'] + '</td>');
+        newTr.append('<td>' + newUtilisateur['password'].replace(/./g, '*') + '</td>');
+        $("#listeUtilisateur").append(newTr);
+        majSelect();
+    });
+
+    $("#connection").submit(function(e) {
+        e.preventDefault();
+
+        var email = $("#connection input[name='email']").val();
+        var password = $("#connection input[name='password']").val();
+
+        for (var i = 0; i < utilisateurs.length; i++) {
+            if (utilisateurs[i].email == email &&
+                utilisateurs[i].password == password) {
+                $("#nomSuccessMessage").html(utilisateurs[i].nom);
+                $("#prenomSuccessMessage").html(utilisateurs[i].prenom);
+                $("#connection .text-success").show();
+                return;
+            }
+        }
+        $("#connection .text-danger:last").show();
+    });
+
+    $("#suppressionUtilisateurButton").click(function() {
+
+        majSelect();
+    })
+
+    function majSelect() {
+        $("#suppressionUtilisateur").empty();
+        $.each(utilisateurs, function(index) {
+            $("#suppressionUtilisateur").append('<option value="' + index + '">' + this.nom + ' ' + this.prenom + '</option>');
+        })
+    }
+})
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- FIN -->
