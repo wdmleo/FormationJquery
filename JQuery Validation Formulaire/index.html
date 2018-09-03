@@ -1,0 +1,63 @@
+<html>
+<body>
+
+<form id="myForm">
+    <input name="pseudo" />
+    <input name="password" type="password" />
+    <input type="submit" />
+</form>
+
+<!-- JS -->
+<script src="js/jquery.js"></script>
+<script>
+
+// $.function
+// $("").function
+
+// function init() {
+//     var maList = $("#maList");
+//     var aMaList = maList.find('a[href]').first();
+//     console.log(aMaList);
+//     aMaList.attr('href', 'https://facebook.com');
+//     aMaList.css('color', 'red');
+//     console.log(aMaList.css('color'));
+//
+//     console.log(maList.html());
+//     console.log(maList.text());
+//
+//     maList.html('<li>modification</li>');
+//
+//     console.log(maList.html());
+//
+//     maList.empty();
+//     maList.html('');
+//
+//     var monNouveauElem = $("<li>Mon nouveau element</li>");
+//     maList.append(monNouveauElem);
+// }
+
+function validationForm(e) {
+    e.preventDefault();
+
+    // Le code commence ici
+
+}
+
+function init() {
+    $("myForm").submit(validationForm);
+}
+
+$(document).ready(init)
+
+// $(function() {
+//
+// })
+//
+// $(window).load(function() {
+//
+// })
+
+</script>
+
+</body>
+</html>
