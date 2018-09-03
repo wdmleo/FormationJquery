@@ -1,9 +1,31 @@
+<!DOCTYPE html>
 <html>
+<head>
+    <meta charset="UTF-8" />
+    <title>JQuery Validation Formulaire</title>
+
+    <style>
+    .erreur {
+        color: 'red';
+    }
+    .success {
+        color: 'green';
+    }
+    </style>
+</head>
 <body>
 
 <form id="myForm">
-    <input name="pseudo" />
-    <input name="password" type="password" />
+    <div class="form-control">
+        <input name="pseudo" /><br>
+        <span for="pseudo" class="erreur cacheAuDebut">Le pseudo est vide...</span>
+    </div>
+    <div class="form-control">
+        <input name="password" type="password" />
+        <span for="password" class="erreur cacheAuDebut">Le mot de passe est vide...</span>
+    </div>
+    <span id="submitErreur" class="erreur cacheAuDebut">Le pseudo et le mot de passe ne corresponde pas.</span><br>
+    <span id="submitOk" class="success cacheAuDebut">Valide !</span>
     <input type="submit" />
 </form>
 
@@ -37,14 +59,53 @@
 // }
 
 function validationForm(e) {
-    e.preventDefault();
+    e.preventDefault()
 
     // Le code commence ici
+    // On cache les erreurs précédentes.
+    $(".cacheAuDebut").hide();
 
+    // On récupère tout les champs qui possède un attribut name
+    var champs = $("input[name]");
+
+    // Afin de vérifier qu'ils sont identique, on récupère la valeur du premier champs
+    var identique = champs.first().val();
+
+    // Vérification si on a une erreur de champs vide
+    var erreur = false;
+
+    // Pour chaque champs on appelle une fonction.
+    champs.each(function() {
+        // $(this) est une variable qui contient l'élément actuel dans la fonction
+
+        // On vérifie si le champs est nul
+        if ($(this).val() == '') {
+            // On affiche la span qui a le même nom dans for que nous
+            $("span[for='" + $(this).attr('name') + "']").show();
+            // On dit qu'il y a une erreur
+            erreur = true;
+        }
+        // On vérifie si c'est différent que la valeur du premier champs
+        if ($(this).val() != identique) {
+            // On met à null ce qui nous permet de savoir que les champs ne sont pas identique
+            identique = null;
+        }
+    });
+
+    // Si il n'y a pas d'erreur de champs vide mais que identique est null
+    if (identique == null && !erreur) {
+        $("#submitErreur").show();
+        // On affiche l'erreur
+    }
+    else if (!erreur) { // Si il n'y a aucune erreur
+        // On affiche le succes
+        $("#submitOk").show();
+    }
 }
 
 function init() {
-    $("myForm").submit(validationForm);
+    $(".cacheAuDebut").hide();
+    $("#myForm").submit(validationForm);
 }
 
 $(document).ready(init)
