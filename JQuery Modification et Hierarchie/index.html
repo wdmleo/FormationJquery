@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>JQuery Modification et Hierarchie</title>
+</head>
+<body>
+
+<div id="grandParent">
+    <div id="parent">
+        <div id="enfant">
+            <div id="sousEnfant">
+
+            </div>
+        </div>
+    </div>
+    <div id="parent2">
+    </div>
+    <div id="parent3">
+    </div>
+</div>
+
+<!-- JS -->
+<script src="js/jquery.js"></script>
+<script>
+
+function drawSelection(jqObj) {
+    jqObj.each(function(index) {
+        console.log('[' + index + ']', $(this));
+    });
+}
+
+$(function() {
+    drawSelection($("#enfant").parents());
+})
+
+</script>
+
+</body>
+</html>

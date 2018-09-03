@@ -3,15 +3,6 @@
 <head>
     <meta charset="UTF-8" />
     <title>JQuery Validation Formulaire</title>
-
-    <style>
-    .erreur {
-        color: 'red';
-    }
-    .success {
-        color: 'green';
-    }
-    </style>
 </head>
 <body>
 
@@ -59,6 +50,23 @@
 // }
 
 function validationForm(e) {
+    e.preventDefault();
+    $(".cacheAuDebut").hide();
+
+    var pseudo = $("input[name='pseudo']").val();
+    var password = $("input[name='password']").val();
+    if (pseudo == '') {
+        $("span[for='name']").show();
+    }
+    else if (password == '') {
+        $("span[for='password']").show();
+    }
+    else if (pseudo != password) {
+        $("#submitErreur").show();
+    }
+}
+
+function validationForm(e) {
     e.preventDefault()
 
     // Le code commence ici
@@ -66,7 +74,7 @@ function validationForm(e) {
     $(".cacheAuDebut").hide();
 
     // On récupère tout les champs qui possède un attribut name
-    var champs = $("input[name]");
+    var champs = $("#myForm input[name]");
 
     // Afin de vérifier qu'ils sont identique, on récupère la valeur du premier champs
     var identique = champs.first().val();
