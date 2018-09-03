@@ -6,7 +6,7 @@
 </head>
 <body>
 
-<div id="grandParent">
+<div id="grandParent" class="topParent">
     <div id="parent">
         <div id="enfant">
             <div id="sousEnfant">
@@ -31,7 +31,19 @@ function drawSelection(jqObj) {
 }
 
 $(function() {
-    drawSelection($("#enfant").parents());
+    var parent = $("#parent");
+    var parentA = $("#parent");
+
+    if  (parent[0] === parentA.get(0)) {
+        // VRAI
+    }
+
+    var span = '<span>Bonjour</span>';
+    $("#sousEnfant").append(span);
+    $("#sousEnfant").append(span);
+
+    var seulementHtml = $("#parent").find('div').remove();
+    var exactHtml = $("#parent").find('div').detach();
 })
 
 </script>
