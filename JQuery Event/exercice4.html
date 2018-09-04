@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>JQuery Event</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/app.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container-flex content">
+        <div class="row">
+            <div class="col-6">
+                <h3>Ajouter un utilisateur</h3>
+                <form id="ajoutUtilisateur">
+                    <div class="form-group">
+                        <label>Nom</label>
+                        <input name="nom" placeholder="Nom" class="form-control"/>
+                        <small class="text-danger" for="nom">Le champs est vide.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Prénom</label>
+                        <input name="prenom" placeholder="Prénom" class="form-control"/>
+                        <small class="text-danger" for="prenom">Le champs est vide.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>E-mail</label>
+                        <input name="email" placeholder="E-mail" class="form-control"/>
+                        <small class="text-danger" for="email">Le champs est vide.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Mot de passe</label>
+                        <input name="password" type="password" placeholder="Mot de passe" class="form-control"/>
+                        <small class="text-danger" for="password">Le champs est vide.</small>
+                    </div>
+                    <div class="form-group">
+                        <small id="emailUnique" class="text-danger erreur">L'email existe déjà.</small><br>
+                        <button class="right btn btn-success">Ajouter</button>
+                    </div>
+                </form>
+                <hr class="connected">
+                <h3 class="connected">Supprimer un utilisateur</h3>
+                <select class="form-control connected" id="suppressionUtilisateur">
+
+                </select>
+                <button class="btn btn-block btn-danger connected" id="suppressionUtilisateurButton">Supprimer</button>
+                <hr>
+                <h3 class="disconnected">Connection utilisateur</h3>
+                <form id="connection" class="disconnected">
+                    <div class="form-group">
+                        <label>E-mail</label>
+                        <input name="email" placeholder="E-mail" class="form-control"/>
+                        <small for="email" class="text-danger">L'email est invalide.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Mot de passe</label>
+                        <input name="password" type="password" placeholder="Mot de passe" class="form-control"/>
+                        <small for="password" class="text-danger">Le mot de passe est invalide.</small>
+                    </div>
+                    <div class="form-group">
+                        <small class="text-danger">Connection impossible.</small><br>
+                        <button class="right btn btn-success">Se connecter</button>
+                    </div>
+                </form>
+                <small class="text-success">Bonjour <span id="nomSuccessMessage"></span> <span id="prenomSuccessMessage"></span></small><br>
+                <button id="disconnect" class="connected btn btn-danger">Se déconnecter</button>
+            </div>
+            <div class="col-6">
+                <h3>Mes utilisateurs</h3>
+                <ul id="listeUtilisateur" class="list-group">
+
+                </ul>
+            </div>
+        </div>
+
+    </div>
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.26.13/dist/sweetalert2.all.min.js" integrity="sha256-403O/WS8xYZmqV1w+SEshT+ahQAZzHy4kh5cN5DTwNw=" crossorigin="anonymous"></script>
+
+    <script>
+
+    var utilisateurs = [];
+    var connected = false;
+    var connectedEmail = "";
+
+    $(function() {
+        $("small").hide();
+
+        // On cache tout ce qui possède la class connected
+        $(".connected").hide();
+
+        $("body").on('click', '.supprimer', function(e) {
+            console.log("CLICK")
+            if (!connected) {
+                return false;
+            }
+            var ligne = $(this).closest('li');
+            supprimeUtililsateur(ligne.index());
+        })
+
+        // Pour chaque changement dans l'input on affiche une erreur si c'est vide.
+        $("#ajoutUtilisateur input[name]").on("change keyup", function() {
+            if ($(this).val() == '') {
+                $("#ajoutUtilisateur small[for='" + $(this).attr('name') + "']").show();
+            }
+            else {
+                $("#ajoutUtilisateur small[for='" + $(this).attr('name') + "']").hide();
+            }
+        })
+
+        $("#ajoutUtilisateur").submit(function(e) {
+            e.preventDefault();
+
+            var newUtilisateur = {};
+            var erreur = false;
+            var email = $("#ajoutUtilisateur input[name='email']").val();
+            $.each(utilisateurs, function() {
+                if (this.email == email) {
+                    erreur = true;
+                    return false;
+                }
+            });
+            if (erreur) {
+                $("#emailUnique").show();
+                swal({
+                    title: 'Erreur !',
+                    text: 'L\'email existe déjà !',
+                    type: 'error',
+                    confirmButtonText: 'Ok'
+                });
+                return;
+            }
+            $("#ajoutUtilisateur input[name]").each(function() {
+                if ($(this).val() == '') {
+                    erreur = true;
+                    $("#ajoutUtilisateur small[for='" + $(this).attr('name') + "']").show();
+                }
+                newUtilisateur[$(this).attr('name')] = $(this).val();
+            });
+            if (erreur) {
+                return;
+            }
+            ajouteUtilisateur(newUtilisateur);
+            majSelect();
+        });
+
+        // Si on click sur le boutton de déconnection
+        $("#disconnect").click(function() {
+            // On met la varible connected à faux
+            connected = false;
+            // On cache tout ce qui possède la class connected
+            $(".connected").hide();
+            // On affiche tout ce qui possède la class disconnected
+            $(".disconnected").show();
+            // On supprime l'evenement du bouton de suppression pour éviter que la personne click sur le bouton
+            $("#suppressionUtilisateurButton").off("click");
+            // On réactive la connection utilisateur
+            $("#connection").submit(onConnection);
+            // On cache l'affichage du nom et prénom
+            $(".text-success").hide();
+        })
+
+        // Evenement de submit sur la connection
+        $("#connection").submit(onConnection);
+
+        function majSelect() {
+            $("#suppressionUtilisateur").empty();
+            $.each(utilisateurs, function(index) {
+                $("#suppressionUtilisateur").append('<option value="' + index + '">' + this.nom + ' ' + this.prenom + '</option>');
+            });
+        }
+
+        // Lors de la suppression utilisateur
+        function onSuppressionUtilisateur() {
+            var aSupprimer = $("#suppressionUtilisateur").val();
+            supprimeUtililsateur(aSupprimer);
+        }
+
+        function supprimeUtililsateur(aSupprimer) {
+            // On recherche la ligne dans le tableau à Supprimer
+            // Puis on recherche tout les td de cette ligne
+            // On récupère la 3ème ligne
+            // On compare l'html avec l'email connecté
+            if ($("#listeUtilisateur li").eq(aSupprimer).data('email') == connectedEmail) {
+                swal({
+                    title: 'Erreur !',
+                    text: 'Vous ne pouvez pas vous supprimer vous même',
+                    type: 'error',
+                    confirmButtonText: 'Ok'
+                });
+                return;
+            }
+            utilisateurs.splice(aSupprimer, 1);
+
+            $("#suppressionUtilisateur option").eq(aSupprimer).remove();
+            $("#listeUtilisateur li").eq(aSupprimer).remove();
+            majSelect();
+        }
+
+        function onConnection(e) {
+            e.preventDefault();
+
+            var email = $("#connection input[name='email']").val();
+            var password = $("#connection input[name='password']").val();
+
+            for (var i = 0; i < utilisateurs.length; i++) {
+                if (utilisateurs[i].email == email &&
+                    utilisateurs[i].password == password) {
+                        $("#nomSuccessMessage").html(utilisateurs[i].nom);
+                        $("#prenomSuccessMessage").html(utilisateurs[i].prenom);
+                        $(".text-success").show();
+
+                        // On sauvegarde l'email connecté
+                        connectedEmail = email;
+                        // On met la variable de connection à vrai
+                        connected = true;
+                        // On supprime la liaison de l'evenement submit
+                        $("#connection").off("submit");
+                        // On affiche tout ce qui possede la classe connected
+                        $(".connected").show(200);
+                        // On cache tout ce qui possède la class disconnected
+                        $(".disconnected").hide(200);
+                        // On associe le click de suppression à l'action de suppression
+                        $("#suppressionUtilisateurButton").click(onSuppressionUtilisateur);
+
+                        return;
+                    }
+                }
+                $("#connection .text-danger:last").show();
+            }
+
+            generateUser();
+
+            function generateUser() {
+                let data = [
+                    ["Fannie", "Underwood", "Fannie.Underwood@gmail.com", "Fannie"],
+                    ["Lana", "Castro", "Lana.Castro@gmail.com", "Lana"],
+                    ["Enrique", "Wolfe", "Enrique.Wolfe@gmail.com", "Enrique"],
+                    ["Keith", "Barrett", "Keith.Barrett@gmail.com", "Keith"],
+                    ["Vernon", "Holloway", "Vernon.Holloway@gmail.com", "Vernon"],
+                    ["Emmett", "French", "Emmett.French@gmail.com", "Emmett"],
+                    ["Bradley", "Rogers", "Bradley.Rogers@gmail.com", "Bradley"],
+                    ["Virginia", "Warner", "Virginia.Warner@gmail.com", "Virginia"],
+                    ["Rick", "Lambert", "Rick.Lambert@gmail.com", "Rick"],
+                    ["Emily", "Ellis", "Emily.Ellis@gmail.com", "Emily"]
+                ];
+                const keys = ['prenom', 'nom', 'email', 'password'];
+                for (var i = 0; i < data.length; i++) {
+                    let d = data[i];
+                    var newUtilisateur = {};
+                    for (var j = 0; j < d.length; j++) {
+                        newUtilisateur[keys[j]] = (j >= 2 ? d[j].toLowerCase() : d[j]);
+                    }
+                    ajouteUtilisateur(newUtilisateur);
+                }
+                majSelect();
+            }
+
+            function ajouteUtilisateur(newUtilisateur) {
+                utilisateurs.push(newUtilisateur);
+                newTr = $("<li class='list-group-item'></li>");
+                newTr.append('<span>' + newUtilisateur['nom'] + ' ' + newUtilisateur['prenom'] + '</span>');
+                newTr.append('<i class="material-icons supprimer connected">delete</i>');
+
+                if (!connected) {
+                    newTr.find('.supprimer').hide();
+                }
+                newTr.data('email', newUtilisateur.email);
+                newTr.data('password', newUtilisateur.password);
+                newTr.data('nom', newUtilisateur.nom);
+                newTr.data('prenom', newUtilisateur.prenom);
+                $("#listeUtilisateur").append(newTr);
+            }
+        })
+
+    </script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- FIN -->
