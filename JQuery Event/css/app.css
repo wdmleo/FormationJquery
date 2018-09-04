@@ -8,3 +8,9 @@ body {
     margin: 16px;
     padding: 8px;
 }
+
+.supprimer {
+    float: right;
+    color: #e74c3c;
+    cursor: pointer;
+}

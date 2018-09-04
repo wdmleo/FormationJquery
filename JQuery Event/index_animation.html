@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>JQuery Modification et Hierarchie</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+<div class="container content">
+    <button class="btn btn-primary btn-block" id="anime1">Anime moi !</button>
+    <p id="target1">Texte</p>
+
+    <button class="btn btn-primary btn-block" id="anime2">Anime moi !</button>
+    <p id="target2">Texte</p>
+
+    <button class="btn btn-primary btn-block" id="anime3">Anime moi !</button>
+    <div id="target3">
+
+    </div>
+
+    <button class="btn btn-primary btn-block" id="anime4">Anime moi !</button>
+    <button class="btn btn-primary btn-block" id="anime5">Anime moi !</button>
+    <button class="btn btn-primary btn-block" id="anime6">Anime moi !</button>
+    <button class="btn btn-primary btn-block" id="anime7">Anime moi !</button>
+</div>
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js" integrity="sha256-0YPKAwZP7Mp3ALMRVB2i8GXeEndvCq3eSl/WsAl1Ryk=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script>
+
+$(function() {
+    $("#anime1").click(function() {
+        console.log("J'anime #anime1")
+        $("#target1").effect("highlight", {}, 500, function() {
+            console.log("#anime1 a fini son animation");
+        })
+    });
+    $("#anime2").click(function() {
+        console.log("J'anime #anime2")
+        $("#target2").effect("highlight", {color: "#FF0000"}, 500, function() {
+            console.log("#anime2 a fini son animation");
+        })
+    });
+    $("#anime3").click(function() {
+        newElem = $("<p>Nouvelle element !</p>");
+        $("#target3").append(newElem);
+        newElem.hide();
+        newElem.fadeIn(200, function() {
+            newElem.effect("shake", {}, 200, function(){
+                console.log("#anime3 a fini son animation");
+            })
+        })
+    });
+})
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- FIN -->
