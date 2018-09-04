@@ -9,7 +9,7 @@
 </head>
 <body>
 
-<div class="container content">
+<div class="container-flex content">
     <div class="row">
         <div class="col-6">
             <h3>Ajouter un utilisateur</h3>
@@ -39,15 +39,15 @@
                     <button class="right btn btn-success">Ajouter</button>
                 </div>
             </form>
-            <hr>
-            <h3>Supprimer un utilisateur</h3>
-            <select class="form-control" id="suppressionUtilisateur">
+            <hr class="connected">
+            <h3 class="connected">Supprimer un utilisateur</h3>
+            <select class="form-control connected" id="suppressionUtilisateur">
 
             </select>
-            <button class="btn btn-block btn-danger" id="suppressionUtilisateurButton" disabled>Supprimer</button>
-            <hr>
-            <h3>Connection utilisateur</h3>
-            <form id="connection">
+            <button class="btn btn-block btn-danger connected" id="suppressionUtilisateurButton">Supprimer</button>
+            <hr class="disconnected">
+            <h3 class="disconnected">Connection utilisateur</h3>
+            <form id="connection" class="disconnected">
                 <div class="form-group">
                     <label>E-mail</label>
                     <input name="email" placeholder="E-mail" class="form-control"/>
@@ -60,10 +60,11 @@
                 </div>
                 <div class="form-group">
                     <small class="text-danger">Connection impossible.</small><br>
-                    <small class="text-success">Bonjour <span id="nomSuccessMessage"></span> <span id="prenomSuccessMessage"></span></small><br>
                     <button class="right btn btn-success">Se connecter</button>
                 </div>
             </form>
+            <small class="text-success connected">Bonjour <span id="nomSuccessMessage"></span> <span id="prenomSuccessMessage"></span></small><br>
+            <button class="right btn btn-success connected" id="deconnection">Se déconnecter</button>
         </div>
         <div class="col-6">
             <table class="table">
@@ -89,11 +90,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script>
-
 var utilisateurs = [];
+
+var currentEmailUtilisateur = "";
 
 $(function() {
     $("small").hide();
+    $(".connected").hide();
+
+    // .connected = L'utilisateur est connecté donc on affiche
+    // .disconnected = L'utilisateur n'est pas connecté donc on affiche
 
     $("#ajoutUtilisateur input[name]").on("change keyup click", function() {
         if ($(this).val() == '') {
@@ -106,7 +112,6 @@ $(function() {
 
     $("#ajoutUtilisateur").submit(function(e) {
         e.preventDefault();
-
         var newUtilisateur = {};
         var erreur = false;
         $("#ajoutUtilisateur input[name]").each(function() {
@@ -125,36 +130,60 @@ $(function() {
         newTr.append('<td>' + newUtilisateur['prenom'] + '</td>');
         newTr.append('<td>' + newUtilisateur['email'] + '</td>');
         newTr.append('<td>' + newUtilisateur['password'].replace(/./g, '*') + '</td>');
-        newTr.append('<td><button class="btn btn-danger connected">Supprimer</button></td>');
         $("#listeUtilisateur").append(newTr);
         majSelect();
     });
 
-    $("#connection").submit(function(e) {
-        e.preventDefault();
+    $("#connection").submit(onConnection);
 
+    function onConnection(e) {
+        e.preventDefault();
         var email = $("#connection input[name='email']").val();
         var password = $("#connection input[name='password']").val();
-
         for (var i = 0; i < utilisateurs.length; i++) {
             if (utilisateurs[i].email == email &&
                 utilisateurs[i].password == password) {
                 $("#nomSuccessMessage").html(utilisateurs[i].nom);
                 $("#prenomSuccessMessage").html(utilisateurs[i].prenom);
-                $("#connection .text-success").show();
+
+                // CONNECTION
+                $(".disconnected").hide(200);
+                $(".connected").show(200);
+
+                currentEmailUtilisateur = email;
+
+                $("#connection").off('submit');
+                $("#suppressionUtilisateurButton").click(onSuppressionUtilisateur);
+
                 return;
             }
         }
         $("#connection .text-danger:last").show();
-    });
+    }
 
-    $("#suppressionUtilisateurButton").click(function() {
+    $("#deconnection").click(function() {
+        // DECONNECTION
+
+        $(".disconnected").show(200);
+        $(".connected").hide(200);
+
+        $("#connection").submit(onConnection);
+        $("#suppressionUtilisateurButton").off('click');
+    })
+
+    function onSuppressionUtilisateur() {
         var aSupprimer = $("#suppressionUtilisateur").val();
+
+        // CHECK SUPPRESSION SOI MEME
+        if (utilisateurs[aSupprimer].email == currentEmailUtilisateur) {
+            alert("Vous ne pouvez pas vous supprimez vous meme.");
+            return;
+        }
         utilisateurs.splice(aSupprimer, 1);
         $("#suppressionUtilisateur option").eq(aSupprimer).remove();
         $("#listeUtilisateur tr").eq(aSupprimer).remove();
         majSelect();
-    })
+    }
 
     function majSelect() {
         $("#suppressionUtilisateur").empty();
@@ -162,6 +191,8 @@ $(function() {
             $("#suppressionUtilisateur").append('<option value="' + index + '">' + this.nom + ' ' + this.prenom + '</option>');
         })
     }
+
+    generateUser();
 
     function generateUser() {
         let data = [
@@ -194,30 +225,7 @@ $(function() {
         majSelect();
     }
 })
-
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- FIN -->
