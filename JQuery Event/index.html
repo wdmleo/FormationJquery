@@ -32,11 +32,7 @@ $(function() {
     //     e.preventDefault();
     //     alert("Click");
     // })
-    // $(".content").append('<button class="btn btn-warning">Bouton ajouté avant</button>');
     //
-    // $("button").click(function() {
-    //     console.log("Click");
-    // })
     // $("button").on('mouseover', function() {
     //     console.log("Hover");
     // })
@@ -49,16 +45,26 @@ $(function() {
     //     }
     // })
     // $("button").off("mouseover");
-    //
-    //
-    // $(".content").append('<button class="btn btn-warning">Bouton ajouté après</button>');
 
-    $("button").one("click", tresLongueFonction);
+    $(".content").append('<button class="btn btn-warning">Bouton ajouté avant</button>');
 
-    $("#monInput").on("keyup change", function() {
-        console.log($("#monInput").val());
-        console.log($(this).val());
+    $("body").on("click", ".btn", function(e) {
+        console.log(e.target);
+        console.log($(this));
     })
+
+    $("button").click(function() {
+        console.log("Click");
+    })
+
+    $(".content").append('<button class="btn btn-warning">Bouton ajouté après</button>');
+
+    // $("button").one("click", tresLongueFonction);
+    //
+    // $("#monInput").on("keyup change", function() {
+    //     console.log($("#monInput").val());
+    //     console.log($(this).val());
+    // })
 })
 
 function tresLongueFonction() {
