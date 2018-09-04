@@ -177,48 +177,66 @@ $(function() {
     // Si on se connecte
     $("#connection").submit(function (e) {
         e.preventDefault();
+        // On cache les messages d'erreur
         $("#connection small").hide();
+        // On récupère l'email et le mot de passe rentrés
         var emailValue = $("#connection [name='email']").val();
         var passwordValue = $("#connection [name='password']").val();
+
+        // On défini nos variables de validation, de nomm et prenom
         var estValide = false;
         var nom = "";
         var prenom = "";
+
+        // Vérification si les champs sont vide ou non
         if (emailValue == '') {
             $("#connection small[for='email']").show();
         }
         if (passwordValue == '') {
             $("#connection small[for='password']").show();
         }
+        // Pour toutes td contenant l'email de connection
         $("td:contains('" + emailValue + "')").each(function() {
+            // Double vérification pour palier au problème de comportement de contains
             if (emailValue == $(this).html()) {
+                // On récupère la data qui a été mise à la création et on la compare au mot de passe
                 if ($(this).nextAll().last().data('realValue') == passwordValue) {
                     estValide = true;
+                    // On valide la connection et on récupère le nom et prénom
                     nom = $(this).parent().find('td').eq(0).html();
                     prenom = $(this).parent().find('td').eq(1).html();
                 }
             }
         });
+        // Si c'est valide on affiche les messages de succès
         if (estValide) {
             $("#connection .text-success").show();
             $("#nomSuccessMessage").html(nom);
             $("#prenomSuccessMessage").html(prenom);
         }
+        // Sinon on affiche le message d'erreur de connection
         else {
             $("#connection .text-danger").last().show();
         }
     });
 
+    // Si on veut supprimer
     $("#supressionUtilisateurButton").click(function() {
         var emailValue = $("#suppressionUtilisateur").val();
+        // On récupère l'email
         $("td:contains('" + emailValue + "')").each(function() {
             if (emailValue == $(this).html()) {
+                // Si l'email est identique on supprime l'option et le parent du td sélectionné
                 $("#suppressionUtilisateur option[value='" + emailValue + "']").remove();
                 var parentToDelete = $(this).parent();
+                // Pour la suppression, on anime en fadeOut et on remove
                 parentToDelete.fadeOut(200, function() {
                     parentToDelete.remove();
                 });
 
+                // Si la select suppressionUtililsateur n'a plus d'option, on la désactive
                 $("#supressionUtilisateurButton").prop('disabled', $("#suppressionUtilisateur option").length == 0);
+                // On retourne false afin de cassé le each (A la manière d'un break)
                 return false;
             }
         });

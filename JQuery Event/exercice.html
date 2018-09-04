@@ -160,6 +160,36 @@ $(function() {
             $("#suppressionUtilisateur").append('<option value="' + index + '">' + this.nom + ' ' + this.prenom + '</option>');
         })
     }
+
+    function generateUser() {
+        let data = [
+            ["Fannie", "Underwood", "Fannie.Underwood@gmail.com", "Fannie"],
+            ["Lana", "Castro", "Lana.Castro@gmail.com", "Lana"],
+            ["Enrique", "Wolfe", "Enrique.Wolfe@gmail.com", "Enrique"],
+            ["Keith", "Barrett", "Keith.Barrett@gmail.com", "Keith"],
+            ["Vernon", "Holloway", "Vernon.Holloway@gmail.com", "Vernon"],
+            ["Emmett", "French", "Emmett.French@gmail.com", "Emmett"],
+            ["Bradley", "Rogers", "Bradley.Rogers@gmail.com", "Bradley"],
+            ["Virginia", "Warner", "Virginia.Warner@gmail.com", "Virginia"],
+            ["Rick", "Lambert", "Rick.Lambert@gmail.com", "Rick"],
+            ["Emily", "Ellis", "Emily.Ellis@gmail.com", "Emily"]
+        ];
+        const keys = ['prenom', 'nom', 'email', 'password'];
+        for (var i = 0; i < data.length; i++) {
+            let d = data[i];
+            var newUtilisateur = {};
+            for (var j = 0; j < d.length; j++) {
+                newUtilisateur[keys[j]] = d[j];
+            }
+            utilisateurs.push(newUtilisateur);
+            var newTr = $("<tr></tr>");
+            newTr.append('<td>' + newUtilisateur['nom'] + '</td>');
+            newTr.append('<td>' + newUtilisateur['prenom'] + '</td>');
+            newTr.append('<td>' + newUtilisateur['email'] + '</td>');
+            newTr.append('<td>' + newUtilisateur['password'].replace(/./g, '*') + '</td>');
+            $("#listeUtilisateur").append(newTr);
+        }
+    }
 })
 
 </script>
