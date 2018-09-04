@@ -95,6 +95,15 @@ var utilisateurs = [];
 $(function() {
     $("small").hide();
 
+    $("#ajoutUtilisateur input[name]").on("change keyup click", function() {
+        if ($(this).val() == '') {
+            $("#ajoutUtilisateur small[for='" + $(this).attr('name') + "']").show();
+        }
+        else {
+            $("#ajoutUtilisateur small[for='" + $(this).attr('name') + "']").hide();
+        }
+    })
+
     $("#ajoutUtilisateur").submit(function(e) {
         e.preventDefault();
 
