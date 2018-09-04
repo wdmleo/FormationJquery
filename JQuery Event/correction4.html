@@ -91,10 +91,10 @@
     var connectedEmail = "";
 
     $(function() {
-        $("small").hide(200);
+        $("small").hide();
 
         // On cache tout ce qui possède la class connected
-        $(".connected").hide(200);
+        $(".connected").hide();
 
         $("body").on('click', '.supprimer', function(e) {
             if (!connected) {
@@ -199,7 +199,7 @@
             utilisateurs.splice(aSupprimer, 1);
 
             $("#suppressionUtilisateur option").eq(aSupprimer).remove();
-            $("#listeUtilisateur li").eq(aSupprimer).effect("drop", {direction: 'right'}, 300, function() {
+            $("#listeUtilisateur li").eq(aSupprimer).effect("drop", {direction: 'right'}, 200, function() {
                 $(this).remove();
             });
             majSelect();
@@ -212,78 +212,122 @@
             var password = $("#connection input[name='password']").val();
 
             for (var i = 0; i < utilisateurs.length; i++) {
-                if (utilisateurs[i].email == email &&
-                    utilisateurs[i].password == password) {
-                        $("#nomSuccessMessage").html(utilisateurs[i].nom);
-                        $("#prenomSuccessMessage").html(utilisateurs[i].prenom);
-                        $(".text-success").show(200);
+                if (utilisateurs[i].email == email && utilisateurs[i].password == password) {
+                    $("#nomSuccessMessage").html(utilisateurs[i].nom);
+                    $("#prenomSuccessMessage").html(utilisateurs[i].prenom);
+                    $(".text-success").show(200);
 
-                        // On sauvegarde l'email connecté
-                        connectedEmail = email;
-                        // On met la variable de connection à vrai
-                        connected = true;
-                        // On supprime la liaison de l'evenement submit
-                        $("#connection").off("submit");
-                        // On affiche tout ce qui possede la classe connected
-                        $(".connected").show(200);
-                        // On cache tout ce qui possède la class disconnected
-                        $(".disconnected").hide(200);
-                        // On associe le click de suppression à l'action de suppression
-                        $("#suppressionUtilisateurButton").click(onSuppressionUtilisateur);
+                    // On sauvegarde l'email connecté
+                    connectedEmail = email;
+                    // On met la variable de connection à vrai
+                    connected = true;
+                    // On supprime la liaison de l'evenement submit
+                    $("#connection").off("submit");
+                    // On affiche tout ce qui possede la classe connected
+                    $(".connected").show(200);
+                    // On cache tout ce qui possède la class disconnected
+                    $(".disconnected").hide(200);
+                    // On associe le click de suppression à l'action de suppression
+                    $("#suppressionUtilisateurButton").click(onSuppressionUtilisateur);
 
-                        return;
+                    return;
+                }
+            }
+            $("#connection").effect('shake');
+            $("#connection .text-danger:last").show(200);
+        }
+
+        generateUser();
+
+        function generateUser() {
+            let data = [
+                ["Fannie", "Underwood", "Fannie.Underwood@gmail.com", "Fannie"],
+                ["Lana", "Castro", "Lana.Castro@gmail.com", "Lana"],
+                ["Enrique", "Wolfe", "Enrique.Wolfe@gmail.com", "Enrique"],
+                ["Keith", "Barrett", "Keith.Barrett@gmail.com", "Keith"],
+                ["Vernon", "Holloway", "Vernon.Holloway@gmail.com", "Vernon"],
+                ["Emmett", "French", "Emmett.French@gmail.com", "Emmett"],
+                ["Bradley", "Rogers", "Bradley.Rogers@gmail.com", "Bradley"],
+                ["Virginia", "Warner", "Virginia.Warner@gmail.com", "Virginia"],
+                ["Rick", "Lambert", "Rick.Lambert@gmail.com", "Rick"],
+                ["Emily", "Ellis", "Emily.Ellis@gmail.com", "Emily"]
+            ];
+            const keys = ['prenom', 'nom', 'email', 'password'];
+            for (var i = 0; i < data.length; i++) {
+                let d = data[i];
+                var newUtilisateur = {};
+                for (var j = 0; j < d.length; j++) {
+                    newUtilisateur[keys[j]] = (j >= 2 ? d[j].toLowerCase() : d[j]);
+                }
+                ajouteUtilisateur(newUtilisateur);
+            }
+            majSelect();
+        }
+
+        function ajouteUtilisateur(newUtilisateur) {
+            utilisateurs.push(newUtilisateur);
+            newTr = $("<li class='list-group-item'></li>");
+            newTr.append('<span>' + newUtilisateur['nom'] + ' ' + newUtilisateur['prenom'] + '</span>');
+            newTr.append('<i class="material-icons supprimer connected">delete</i>');
+
+            if (!connected) {
+                newTr.find('.supprimer').hide();
+            }
+            newTr.data('email', newUtilisateur.email);
+            newTr.data('password', newUtilisateur.password);
+            newTr.data('nom', newUtilisateur.nom);
+            newTr.data('prenom', newUtilisateur.prenom);
+            $("#listeUtilisateur").append(newTr);
+            newTr.hide().fadeIn(300, function() {
+                $(this).effect('highlight', {color: '#3498db'}, 500);
+            })
+        }
+
+        // setInterval(doRandomThings, 1000);
+
+        function doRandomThings() {
+            let id = Math.floor(Math.random() * 5);
+            console.log(id);
+            switch (id) {
+                case 0:
+                    if (connected) {
+                        $("#disconnect").trigger('click');
                     }
-                }
-                $("#connection .text-danger:last").show(200);
-                $("#connection").effect("shake");
-            }
-
-            generateUser();
-
-            function generateUser() {
-                let data = [
-                    ["Fannie", "Underwood", "Fannie.Underwood@gmail.com", "Fannie"],
-                    ["Lana", "Castro", "Lana.Castro@gmail.com", "Lana"],
-                    ["Enrique", "Wolfe", "Enrique.Wolfe@gmail.com", "Enrique"],
-                    ["Keith", "Barrett", "Keith.Barrett@gmail.com", "Keith"],
-                    ["Vernon", "Holloway", "Vernon.Holloway@gmail.com", "Vernon"],
-                    ["Emmett", "French", "Emmett.French@gmail.com", "Emmett"],
-                    ["Bradley", "Rogers", "Bradley.Rogers@gmail.com", "Bradley"],
-                    ["Virginia", "Warner", "Virginia.Warner@gmail.com", "Virginia"],
-                    ["Rick", "Lambert", "Rick.Lambert@gmail.com", "Rick"],
-                    ["Emily", "Ellis", "Emily.Ellis@gmail.com", "Emily"]
-                ];
-                const keys = ['prenom', 'nom', 'email', 'password'];
-                for (var i = 0; i < data.length; i++) {
-                    let d = data[i];
-                    var newUtilisateur = {};
-                    for (var j = 0; j < d.length; j++) {
-                        newUtilisateur[keys[j]] = (j >= 2 ? d[j].toLowerCase() : d[j]);
+                    else {
+                        $("#connection input[name='email']").val("emily.ellis@gmail.com");
+                        $("#connection input[name='password']").val("emily");
+                        $("#connection").trigger('submit');
                     }
-                    ajouteUtilisateur(newUtilisateur);
-                }
-                majSelect();
-            }
+                    break;
+                case 1:
+                    if (!connected) {
+                        $("#connection input[name='email']").val("emily.ellis@gmail.codsadm");
+                        $("#connection input[name='password']").val("emily");
+                        $("#connection").trigger('submit');
+                        break;
+                    } else {
+                        $("#disconnect").trigger('click');
+                        setTimeout(function() {
+                            $("#connection input[name='email']").val("emily.ellis@gmail.codsadm");
+                            $("#connection input[name='password']").val("emily");
+                            $("#connection").trigger('submit');
+                        }, 1000);
+                    }
+                    break;
+                case 2:
+                case 3:
+                case 4:
+                    if (connected) {
+                        var allButton = $("#listeUtilisateur i");
+                        console.log(allButton);
+                        allButton.eq(Math.floor(Math.random() * allButton.length)).trigger('click');
+                    }
+                    break;
+                default:
 
-            function ajouteUtilisateur(newUtilisateur) {
-                utilisateurs.push(newUtilisateur);
-                newTr = $("<li class='list-group-item'></li>");
-                newTr.append('<span>' + newUtilisateur['nom'] + ' ' + newUtilisateur['prenom'] + '</span>');
-                newTr.append('<i class="material-icons supprimer connected">delete</i>');
-
-                if (!connected) {
-                    newTr.find('.supprimer').hide(200);
-                }
-                newTr.data('email', newUtilisateur.email);
-                newTr.data('password', newUtilisateur.password);
-                newTr.data('nom', newUtilisateur.nom);
-                newTr.data('prenom', newUtilisateur.prenom);
-                $("#listeUtilisateur").append(newTr);
-                newTr.hide().fadeIn(500, function() {
-                    newTr.effect('highlight', {color: "#2980b9"}, 300);
-                })
             }
-        })
+        }
+    })
 
     </script>
 
