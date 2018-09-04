@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>JQuery Modification et Hierarchie</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+<div class="container content">
+    <button class="btn btn-primary" id="clickMeButton">Click me !</button>
+    <input class="form-control" id="monInput" />
+</div>
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script>
+
+// function onClickMeButton(e) {
+//     alert("Click");
+// }
+
+$(function() {
+    // $("#clickMeButton").click(function(e) {
+    //     alert("Click")
+    // })
+    // $("#clickMeButton").click(onClickMeButton);
+    // $("button").on('click', function(e) {
+    //     e.preventDefault();
+    //     alert("Click");
+    // })
+    // $(".content").append('<button class="btn btn-warning">Bouton ajouté avant</button>');
+    //
+    // $("button").click(function() {
+    //     console.log("Click");
+    // })
+    // $("button").on('mouseover', function() {
+    //     console.log("Hover");
+    // })
+    // $("button").on({
+    //     "click": function() {
+    //         console.log("Click on")
+    //     },
+    //     "mouseover": function() {
+    //         console.log("Hover on");
+    //     }
+    // })
+    // $("button").off("mouseover");
+    //
+    //
+    // $(".content").append('<button class="btn btn-warning">Bouton ajouté après</button>');
+
+    $("button").one("click", tresLongueFonction);
+
+    $("#monInput").on("keyup change", function() {
+        console.log($("#monInput").val());
+    })
+})
+
+function tresLongueFonction() {
+    console.log("Commence");
+    setTimeout(function() {
+        console.log("Fini");
+        $("button").one("click", tresLongueFonction);
+    }, 1000)
+}
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- FIN -->
