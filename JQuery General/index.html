@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>JQuery Général</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/app.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container content">
+        <button id="monBoutton">Click moi !</button>
+        <ul id="maListe">
+            <li>1</li>
+            <li>2</li>
+            <li>3</li>
+            <li>4</li>
+            <li>5</li>
+        </ul>
+        <ul>
+            <li>1</li>
+            <li>2</li>
+            <li>3</li>
+            <li>4</li>
+            <li>5</li>
+        </ul>
+        <div id="maDiv">
+            Bonjour je suis dans ma div.
+        </div>
+        <a id="googlecestgenial" href="http://google.com">Google</a>
+        <form>
+            <input type="text" id="monInput" />
+        </form>
+    </div>
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <script>
+
+    var myArray = [1, 2, 3, 5, 7, 11];
+    var myObject = {
+        nom: "Smith",
+        prenom: "John",
+        age: 28,
+        "code_postal": 33000,
+        "for": 57,
+        "class": 18,
+        toString: function() {
+            return this.nom + ' ' + this.prenom;
+        }
+    }
+
+    myArray.push(13);
+    myObject['ville'] = 'bordeaux';
+    myObject.ville = 'bordeaux';
+    myObject.age = undefined;
+
+    var monBouttonJquery = $("#monBoutton"); // Jquery qui agit sur le DOM
+    var monBouttonJs = document.getElementById("monBoutton"); // DOM
+
+    var touteLesLiDeToutesLesListes = $("ul li");
+    var liDeMaListe = $("#maListe li");
+    liDeMaListe.css("color", "red");
+    liDeMaListe.each(function() {
+        $(this).html("test");
+    });
+
+    console.log(monBouttonJquery.css('color'));
+    monBouttonJquery.css('color', 'black');
+    console.log(monBouttonJquery.css('color'));
+
+    var maDivHtml = $("#maDiv").html();
+    $("#maDiv").html("<h2>" + maDivHtml + "</h2>");
+
+    $("#googlecestgenial").attr('href', 'http://facebook.com');
+
+    $("#googlecestgenial").hasClass('btn');
+    $("#googlecestgenial").removeClass('btn');
+    $("#googlecestgenial").addClass('btn');
+    $("#googlecestgenial").toggleClass('btn');
+
+    $("#googlecestgenial").attr('class', 'btn btn-primary');
+
+    $("#monInput").val();
+    $("#monInput").val("test");
+
+    $("#googlecestgenial").click(function(e) {
+        if (!prompt("Google risque de voler vos informations privés ! Voulez vous continuer ?")) {
+            e.preventDefault();
+        }
+    })
+
+    </script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- FIN -->

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>JQuery Général</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/app.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container content">
+        <div class="row">
+            <div class="col-6">
+                <form id="ajoutUtilisateur">
+                    <input name="nom" value="testnom">
+                    <input name="prenom" value="testprenom">
+                    <input type="email" name="email" value="toto@tata.fr">
+                    <input type="password" name="mdp" value="mdp">
+                    <input type="submit" value="Valider" />
+                </form>
+            </div>
+            <div class="col-6">
+                <h3>Liste des utilisateurs</h3>
+                <ul id="listeUtilisateur">
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <script>
+
+    $(function() {
+        // ETAPE 4
+        $("#ajoutUtilisateur").submit(function(e) {
+            e.preventDefault();
+
+            var item = "";
+            var inputsAjoutU = $("#ajoutUtilisateur input[name]");
+
+            inputsAjoutU.each(function() {
+                if ($(this).val() == '') {
+                    $(this).css('border', '1px solid red');
+                    return false;
+                }
+                item += ' ' + $(this).val();
+            });
+
+            $("#listeUtilisateur").append('<li>' + item + '</li>');
+        })
+    });
+
+    </script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- FIN -->

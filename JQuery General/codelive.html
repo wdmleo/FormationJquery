@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>JQuery Général</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/app.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container content">
+        <div class="row">
+            <div class="col-6">
+                <form id="ajoutUtilisateur">
+                    <input name="nom" value="test">
+                    <input name="prenom">
+                    <input name="email" value="toto@tata.fr">
+                    <input name="mdp">
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <script>
+
+    $(function() {
+
+        // ETAPE 1
+        //
+        //     var nom = $("#ajoutUtilisateur input[name='nom']");
+        //     var prenom = $("#ajoutUtilisateur input[name='prenom']");
+        //     var email = $("#ajoutUtilisateur input[name='email']");
+        //     var mdp = $("#ajoutUtilisateur input[name='mdp']");
+        //
+        //     if (nom.val() == '') {
+        //         // On met en erreur
+        //         nom.css('border', '1px solid red');
+        //     }
+        //     if (prenom.val() == '') {
+        //         // On met en erreur
+        //         prenom.css('border', '1px solid red');
+        //     }
+        //     if (email.val() == '') {
+        //         // On met en erreur
+        //         email.css('border', '1px solid red');
+        //     }
+        //     if (mdp.val() == '') {
+        //         // On met en erreur
+        //         mdp.css('border', '1px solid red');
+        //     }
+        //
+
+        // ETAPE 2
+        var inputsAjoutU = $("#ajoutUtilisateur input");
+        inputsAjoutU.each(function() {
+            if ($(this).val() == '') {
+                $(this).css('border', '1px solid red');
+                return false;
+            }
+        });
+
+        // each(jqObject, function(self) {
+        //     if ($(self).val() == '') {
+        //         $(self).css('border', '1px solid red');
+        //     }
+        // })
+    });
+
+    function each(jqObject, func) {
+        for (var i = 0; i < jqObject.length; i++) {
+            var self = jqObject[i];
+            if (func(self) === false) {
+                break;
+            }
+        }
+    }
+
+    </script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- FIN -->
