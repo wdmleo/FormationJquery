@@ -27,32 +27,90 @@
                 </ul>
             </div>
         </div>
+        <div class="row">
+            <div class="col-6">
+                <form id="connexion">
+                    <input type="email" name="email" />
+                    <input type="password" name="mdp" />
+                    <input type="submit" value="Se connecter" />
+                </form>
+            </div>
+        </div>
     </div>
     <!-- JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
     <script>
+
+    /**
+    * Créer un utilisateur [OK]
+    * Ajouter l'utilisateur dans une liste [OK]
+    * Authentifier
+    *     - Vérifier si les champs sont remplis [OK]
+    *     - Afficher des messages d'erreurs [OK]
+    *     - Parcourir la liste des utilisateurs
+    *          o Vérifier si l'utilisateur existe [OK]
+    *          o Afficher un message d'erreur [OK]
+    *          o Vérifier le mot de passe [OK]
+    *          o Afficher un message d'erreur [OK]
+    *          o Ajouter une variable de connection [Plus tard]
+    * Faire un effet "shake"
+    */
+
+    var utilisateurs = [];
 
     $(function() {
         // ETAPE 4
         $("#ajoutUtilisateur").submit(function(e) {
             e.preventDefault();
 
-            var item = "";
+            var newUtilisateur = {};
             var inputsAjoutU = $("#ajoutUtilisateur input[name]");
 
             inputsAjoutU.each(function() {
                 if ($(this).val() == '') {
                     $(this).css('border', '1px solid red');
+                    alert("Les champs sont vide !");
                     return false;
                 }
-                item += ' ' + $(this).val();
+                var cle = $(this).attr('name');
+                var valeur = $(this).val();
+                newUtilisateur[cle] = valeur;
+                // newUtilisateur[$(this).attr('name')] = $(this).val();
             });
 
-            $("#listeUtilisateur").append('<li>' + item + '</li>');
+            utilisateurs.push(newUtilisateur);
+
+            $("#listeUtilisateur").append('<li>' + newUtilisateur.email + '</li>');
         })
+
+        $("#connexion").submit(function(e) {
+            e.preventDefault();
+
+            var email = $("#connexion input[name='email']").val();
+            var mdp = $("#connexion input[name='mdp']").val();
+
+            if (email == '' || mdp == '') {
+                alert("Des champs sont vides.");
+                $("#connexion").effect('shake');
+            }
+
+            for (var i = 0; i < utilisateurs.length; i++) {
+                var item = utilisateurs[i];
+                console.log(item);
+                console.log(email, mdp);
+                if (item.email == email && item.mdp == mdp) {
+                    alert("T'es le boss !");
+                    return;
+                }
+            }
+            alert("T'es une buse");
+        })
+
+        var authentification = $("#connexion input[name]");
     });
 
     </script>
