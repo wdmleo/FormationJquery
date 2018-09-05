@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>JQuery Général</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/app.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="container content">
+        <div class="row">
+            <div class="col-6">
+                <form id="ajoutUtilisateur" class="needs-validation" novalidate>
+                    <div class="form-row">
+
+
+                        <div class=" col-12">
+                            <label>Nom</label>
+                            <input name="nom" class="form-control" required />
+                            <div class="invalid-feedback">
+                                Le nom est obligatoire
+                            </div>
+                        </div>
+
+
+                        <div class=" col-12">
+                            <label>Prénom</label>
+                            <input name="prenom" class="form-control" required />
+                            <div class="invalid-feedback">
+                                Le prénom est obligatoire
+                            </div>
+                        </div>
+                        <div class=" col-12">
+                            <label>E-mail</label>
+                            <input type="email" name="email" class="form-control" required />
+                            <div class="invalid-feedback">
+                                L'e-mail est obligatoire
+                            </div>
+                        </div>
+                        <div class=" col-12">
+                            <label>Mot de passe</label>
+                            <input type="password" name="mdp" class="form-control" required />
+                            <div class="invalid-feedback">
+                                Le mot de passe est obligatoire
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <br>
+                            <input type="submit" value="Valider" class="btn btn-primary btn-block" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-6">
+                <h3>Liste des utilisateurs</h3>
+                <ul id="listeUtilisateur" class="list-group">
+                </ul>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-6">
+                <form id="connexion" class="needs-validation" novalidate>
+                    <div class="form-row">
+                        <div class="col-12">
+                            <label>E-mail</label>
+                            <input type="email" name="email" class="form-control" required />
+                            <div class="invalid-feedback">
+                                L'e-mail est obligatoire
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label>Mot de passe</label>
+                            <input type="password" name="mdp" class="form-control" required />
+                            <div class="invalid-feedback">
+                                Le mot de passe est obligatoire
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <br>
+                            <div class="invalid-feedback" id="connectionInvalid">
+                                Erreur de connection (Tu es une buse).
+                            </div>
+                            <br>
+                            <input type="submit" class="btn btn-primary btn-block" value="Se connecter" />
+                        </div>
+                    </div>
+                </form>
+                <br>
+                <div class="valid-feedback" id="connectionSuccess">
+                    Vous êtes connecté <span id="nomCoSuccess"></span> <span id="prenomCoSuccess"></span>
+                </div>
+                <button id="disconnect" class="btn btn-warning btn-block">Se déconnecter</button>
+            </div>
+        </div>
+    </div>
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <script>
+
+    /**
+    * Verifier qu'on est connecté OK
+    * Rajouter l'icone de suppression sauf sur sois meme OK
+    * Ajouter un evenement OK
+    * Supprimer la ligne dans le tableau
+    * Modifier la liste (ul) OK
+    */
+
+    var uniqueId = 0;
+
+    var utilisateurs = [];
+
+    $(function() {
+        // ETAPE 5
+
+        $("#disconnect").hide();
+
+        $("#ajoutUtilisateur").submit(function(e) {
+            e.preventDefault();
+
+            // if (!this.checkValidity()) {
+            //     e.stopPropagation();
+            //     $(this).addClass('was-validated');
+            // }
+
+            var newUtilisateur = {};
+            var inputsAjoutU = $("#ajoutUtilisateur input[name]");
+
+            var erreur = false;
+
+            inputsAjoutU.each(function() {
+                if ($(this).val() == '') {
+                    $(this).siblings('.invalid-feedback').show();
+                    $(this).css('border-color', '#e74c3c');
+                    erreur = true;
+                }
+                else {
+                    $(this).siblings('.invalid-feedback').hide();
+                    $(this).css('border-color', '#2ecc71');
+                }
+                var cle = $(this).attr('name');
+                var valeur = $(this).val();
+                newUtilisateur[cle] = valeur;
+            });
+
+            if (erreur) {
+                return;
+            }
+
+            utilisateurs.push(newUtilisateur);
+
+            $("#listeUtilisateur").append('<li class="list-group-item">' + uniqueId + ' ' + newUtilisateur.email + '</li>');
+            uniqueId++;
+        })
+
+        $("#connexion").submit(function(e) {
+            e.preventDefault();
+
+            var email = $("#connexion input[name='email']");
+            var mdp = $("#connexion input[name='mdp']");
+            var erreur = false;
+
+            if (email.val() == '') {
+                email.siblings('.invalid-feedback').show();
+                email.css('border-color', '#e74c3c');
+                $("#connexion").effect("shake");
+                erreur = true;
+            }
+            else {
+                email.siblings('.invalid-feedback').hide();
+                email.css('border-color', '#2ecc71');
+            }
+
+            if (mdp.val() == '') {
+                mdp.siblings('.invalid-feedback')
+                    .show()
+                    .end()
+                    .css('border-color', '#e74c3c');
+                $("#connexion").effect("shake");
+                erreur = true;
+            }
+            else {
+                mdp.siblings('.invalid-feedback').hide();
+                mdp.css('border-color', '#2ecc71');
+            }
+
+            if (erreur) {
+                return;
+            }
+
+            for (var i = 0; i < utilisateurs.length; i++) {
+                var item = utilisateurs[i];
+                if (item.email == email.val() && item.mdp == mdp.val()) {
+                    $("#connectionSuccess").show();
+                    $("#connectionInvalid").hide();
+
+                    $("#nomCoSuccess").html(item.nom);
+                    $("#prenomCoSuccess").html(item.prenom);
+
+                    $("#disconnect").show(200);
+                    $("#connexion").hide(200);
+
+                    $("#listeUtilisateur li").not("li:eq(" + i + ")").append('<i class="material-icons supprimer">delete</i>');
+                    $(".supprimer").click(function() {
+                        var index = $(this).parent().index();
+                        $(this).parent().effect("drop", {direction: "right"}, 300, function() {
+                            $(this).remove();
+                        })
+                        utilisateurs.splice(index, 1);
+                    })
+
+                    return;
+                }
+            }
+            $("#connectionSuccess").hide();
+            $("#connectionInvalid").show();
+        })
+
+        $("#disconnect").click(function() {
+            $("#connectionSuccess").hide();
+            $("#disconnect").hide(200);
+            $("#connexion").show(200);
+        })
+    });
+
+    </script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- FIN -->
