@@ -10,25 +10,33 @@
 <body>
 
 <div class="container content">
-    <form id="" class="needs-validation" novalidate>
+    <form id="addressForm" class="needs-validation" novalidate>
         <div class="form-row">
-            <div class=" col-12">
-                <label>Nom</label>
-                <input name="nom" class="form-control" required />
+            <div class=" col-8">
+                <label>Adresse</label>
+                <input name="address" class="form-control" required />
                 <div class="invalid-feedback">
-                    Le nom est obligatoire
+                    L'adresse est obligatoire
                 </div>
             </div>
 
-            <div class=" col-12">
-                <label>Prénom</label>
-                <input name="prenom" class="form-control" required />
+            <div class=" col-4">
+                <label>Code postal</label>
+                <input name="postal_code" class="form-control" required />
                 <div class="invalid-feedback">
-                    Le prénom est obligatoire
+                    Le code postal est obligatoire
                 </div>
+            </div>
+
+            <div class="col-12">
+                <br>
+                <input type="submit" value="Valider" class="btn btn-primary btn-block" />
             </div>
         </div>
     </form>
+    <div id="address">
+
+    </div>
 </div>
 <!-- JS -->
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -36,7 +44,30 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script>
 
+$("#addressForm").submit(function(e) {
+    e.preventDefault();
 
+    $(this).addClass('was-validated');
+    if (!this.checkValidity()) {
+        return false;
+    }
+
+    var adresse = $("input[name='address']").val();
+    var postalCode = $("input[name='postal_code']").val();
+
+    $.ajax({
+        url: 'https://api-adresse.data.gouv.fr/search/',
+        data: {
+            q: adresse + ' ' + postalCode
+        },
+        success: function(data) {
+            var label = data.features[0].properties.label;
+            $("#address").html(label);
+        }
+    })
+
+    // https://datanova.legroupe.laposte.fr/api/records/1.0/search/?dataset=laposte_hexasmal&q=33000&facet=nom_de_la_commune&facet=code_postal
+})
 
 </script>
 
