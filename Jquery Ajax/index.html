@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>JQuery Modification et Hierarchie</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+<div class="container content">
+    <div id="ajaxContent">
+
+    </div>
+    <input id="code_postal" class="form-control" />
+    <button class="btn btn-primary btn-block" id="recherche">Rechercher</button>
+    <div id="monAdresse">
+
+    </div>
+</div>
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script>
+
+var maGlobal = undefined;
+
+$(function() {
+
+    console.log("Avant ajax");
+    $.ajax({
+        url: './ajax.php',
+        success: function(data) {
+            maGlobal = data;
+            console.log(JSON.parse(data));
+        },
+        error: function() {
+
+        }
+    });
+    console.log("Apres ajax");
+
+    $("#recherche").click(function() {
+        $.ajax({
+            url: 'https://api-adresse.data.gouv.fr/search/?q=' + $("#code_postal").val() + '&type=municipality',
+            success: function(data) {
+                var city = data.features[0].properties.city;
+                $("#monAdresse").html(city);
+            },
+            error: function() {
+                console.error("La recherche n'a pas abouti.");
+            }
+        })
+    })
+
+})
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- FIN -->
