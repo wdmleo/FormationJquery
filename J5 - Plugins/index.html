@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>JQuery Modification et Hierarchie</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+<div class="container content">
+    <div id="drag">
+
+    </div>
+</div>
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script
+			  src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"
+			  integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="
+			  crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script>
+
+$(function() {
+    $("#drag").draggable();
+    $("#sort").sortable();
+    $("#drop").dropable();
+
+    $.fn.extend({
+        checkMyForm: function(onValid, onInvalid) {
+            if (this.checkValidity()) {
+                onValid();
+            }
+            else {
+                onInvalid();
+            }
+            $(this).addClass('was-validated');
+        },
+        exists: function() {
+            return $(this).length > 0;
+        }
+    })
+
+    $("#drag").checkMyForm(function() {
+        console.log("Valide");
+    }, function() {
+        console.log("Pas valide");
+    });
+})
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- FIN -->

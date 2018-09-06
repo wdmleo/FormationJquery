@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>JQuery Modification et Hierarchie</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+<div class="container content">
+    <form id="addressForm" class="needs-validation" novalidate>
+        <div class="form-row">
+            <div class=" col-8">
+                <label>Adresse</label>
+                <input name="address" class="form-control" required />
+                <div class="invalid-feedback">
+                    L'adresse est obligatoire
+                </div>
+            </div>
+
+            <div class=" col-4">
+                <label>Code postal</label>
+                <input name="postal_code" class="form-control" autocomplete="off" required />
+                <select class="form-control" id="postalDataList">
+
+                </select>
+                <div class="invalid-feedback">
+                    Le code postal est obligatoire
+                </div>
+            </div>
+
+            <div class="col-12">
+                <br>
+                <input type="submit" value="Valider" class="btn btn-primary btn-block" />
+            </div>
+        </div>
+    </form>
+    <div id="address">
+    </div>
+</div>
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script>
+
+var ajaxTimeout = null;
+
+$("#addressForm input[name='postal_code']").on('change keyup', function() {
+
+    $("#postalDataList").html("<option>Chargement...</option>");
+
+    if (ajaxTimeout != null) {
+        clearTimeout(ajaxTimeout);
+    }
+
+    var self = this;
+
+    ajaxTimeout = setTimeout(function() {
+        $.ajax({
+            url: 'https://datanova.legroupe.laposte.fr/api/records/1.0/search/',
+            data: {
+                q: $(self).val(),
+                dataset: 'laposte_hexasmal',
+                facet: [
+                    'nom_de_la_commune',
+                    'code_postal'
+                ]
+            },
+            success: function(data) {
+                var enregistrements = data.records;
+                $("#postalDataList").empty();
+                $.each(enregistrements, function() {
+                    var newOption = '<option value=' + this.fields.code_postal + '>' + this.fields.code_postal + ' - ' + this.fields.nom_de_la_commune + '</option>'
+                    $("#postalDataList").append(newOption);
+                })
+
+
+                // for (var i = 0; i < enregistrements.length; i++) {
+                //     enregistrements[i]
+                // }
+                // for (var enregistrements in key) {
+                //     if (key.hasOwnProperty(enregistrements)) {
+                //
+                //     }
+                // }
+                // for (item of enregistrements) {
+                //
+                // }
+            }
+        })
+    }, 500);
+
+
+    /**
+     * On annule le timeout precedent
+     * On attend 500ms
+     * On execute la requete ajax
+     */
+
+
+})
+
+$("#addressForm").submit(function(e) {
+    e.preventDefault();
+
+    $(this).addClass('was-validated')
+    if (!this.checkValidity()) {
+        e.stopPropagation();
+        return;
+    }
+
+    var address = $(this).find('[name="address"]');
+    var postalCode = $(this).find('[name="postal_code"]');
+
+    $.ajax({
+        url: encodeURI('https://api-adresse.data.gouv.fr/search/?q=' + address.val() + ' ' + postalCode.val() + '&limit=1'),
+        success: function(data) {
+            if (data.features.length > 0) {
+                var currentAddress = data.features[0];
+                $("#address").html(currentAddress.properties.label);
+            }
+            else {
+                $("#address").html("Aucun résultat trouvé");
+            }
+        }
+    })
+})
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- FIN -->
