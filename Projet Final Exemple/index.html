@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>JQuery Modification et Hierarchie</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+    <div class="container-flex content">
+        <div class="row">
+            <div class="col-8">
+                <form id="research">
+                    <div class="form-row">
+                        <div class="col-12">
+                            <label>Rechercher</label>
+                            <input name="search" class="form-control" placeholder="ex : banane, viande, legume" />
+                            <br>
+                            <button class="btn btn-primary btn-block">Rechercher</button>
+                        </div>
+                    </div>
+                </form>
+                <br>
+                <hr>
+                <br>
+                <div id="allResult" class="row">
+                </div>
+                <div id="loading" class="alert alert-primary">
+                    <i class="fas fa-spinner fa-pulse"></i> Chargement des données <span id="loadingPoints">...</span>
+                </div>
+            </div>
+            <div class="col-4">
+
+            </div>
+        </div>
+    </div>
+    <div class="modal" tabindex="-1" role="dialog" id="modalProduct">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-8">
+                                <h5>Description</h5>
+                                <p id="description"></p>
+                                <h5>Ingredient</h5>
+                                <ul id="ingredient"></ul>
+                                <h5>Allèrgènes</h5>
+                                <ul id="allergene"></ul>
+                            </div>
+                            <div class="col-4 imageCol">
+                                <img id="imageUrl" />
+                                <img id="imageFrontUrl" />
+                                <img id="imageIngredientUrl" />
+                                <img id="imageNutritionUrl" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/barcodes/JsBarcode.ean-upc.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script>
+
+    setInterval(function() {
+        let previous = $("#loadingPoints").html()
+        if (previous.length >= 3) {
+            $("#loadingPoints").html('.');
+        }
+        else {
+            $("#loadingPoints").html(previous + '.')
+        }
+    }, 500);
+
+    $("#research").submit(function(e) {
+        e.preventDefault()
+        search($("#research input[name='search']").val());
+    })
+
+    $(function() {
+        search('');
+    })
+
+    var lastSearch = '';
+    var lastPage = 0;
+    var totalPage = 1;
+    var isLoading = false;
+
+    $(window).scroll(function(e) {
+        checkScroll();
+    });
+
+    function checkScroll() {
+        var scrollTop = $(window).scrollTop();
+        var docHeight = $(document).height();
+        var winHeight = $(window).height();
+        var scrollPercent = (scrollTop) / (docHeight - winHeight);
+
+        console.log(totalPage);
+        console.log(isLoading);
+        console.log(scrollPercent);
+
+        if (scrollPercent > 0.8 && isLoading == false && totalPage > lastPage + 1) {
+            lastPage++;
+            load();
+        }
+    }
+
+    function search(research) {
+        lastPage = 0;
+        lastSearch = research;
+        $("#allResult").empty();
+        load();
+    }
+
+    function load() {
+        const template = `
+        <div class="col-3">
+        <div class="card">
+        <div style="height: 200px" class="img-card">
+        </div>
+        <div class="card-body">
+        <svg class="barcode">
+
+        </svg>
+        <h5 class="card-title">Card title</h5>
+        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        <button class="btn btn-default btn-block">Détail</button>
+        </div>
+        </div>
+        </div>
+        `;
+        $("#loading").show();
+        isLoading = true;
+        $.ajax({
+            url: 'https://world.openfoodfacts.org/cgi/search.pl',
+            data: {
+                page_size: 20,
+                search_terms: lastSearch,
+                search_simple: 1,
+                action: 'process',
+                json: 1,
+                page: lastPage + 1
+            },
+            success: function(data) {
+                totalPage = Math.ceil(data.count / 20.0);
+                for (var i = 0; i < data.products.length; i++) {
+                    let product = data.products[i];
+                    let newObj = $(template);
+                    newObj.find('.img-card').css('background-image', 'url(' + product.image_url + ')');
+                    newObj.find('.card-title').html(product.product_name_fr);
+                    newObj.find('.card-text').html(product.generic_name_fr);
+                    if (product.id) {
+                        let code = product.id;
+                        let format = '';
+                        if (product.id.length == 8) {
+                            format = 'ean8'
+                        }
+                        else if (product.id.length == 13) {
+                            format = 'ean13'
+                            code = code.substring(0, 12);
+                        }
+                        if (format != '' && code != null) {
+                            newObj.find('.barcode').attr('jsbarcode-format', format);
+                            newObj.find('.barcode').attr('jsbarcode-value', code);
+                            newObj.find('.barcode').attr('jsbarcode-height', 50);
+                        }
+                        else {
+                            newObj.find('.barcode').remove();
+                        }
+                    }
+                    else {
+                        newObj.find('.barcode').remove();
+                    }
+                    newObj.find('button').data('api_data', product);
+                    newObj.find('button').click(function() {
+                        var data = $(this).data('api_data');
+
+                        console.log(data);
+
+                        $("#modalProduct .modal-title").html(data.product_name_fr);
+                        $("#imageUrl").attr('src', data.image_url);
+                        $("#imageFrontUrl").attr('src', data.image_front_url);
+                        $("#imageNutritionUrl").attr('src', data.image_nutrition_url);
+                        $("#imageIngredientUrl").attr('src', data.image_ingredient_url);
+                        $("#description").html(product.generic_name_fr);
+                        $("#ingredient").html($.map(product.ingredients, (ing) => ('<li>' + ing.text.replace(/_/g, '') + '</li>')).join(''));
+                        $("#allergene").html($.map(product.allergens.split(','), (all) => ('<li>' + all + '</li>')).join(''));
+                        $("#modalProduct").modal('show');
+                    })
+                    $("#allResult").append(newObj);
+                }
+                JsBarcode('.barcode').init();
+                $("#loading").hide();
+                isLoading = false;
+                checkScroll();
+            }
+        });
+    }
+
+    </script>
+
+</body>
+</html>

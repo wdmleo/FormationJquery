@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>JQuery Modification et Hierarchie</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/app.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+</head>
+<body>
+
+    <div class="container-flex content">
+        <div class="row">
+            <div class="col-8">
+                <form id="research">
+                    <div class="form-row">
+                        <div class="col-12">
+                            <label>Rechercher</label>
+                            <input name="search" class="form-control" placeholder="ex : banane, viande, legume" />
+                            <br>
+                            <button class="btn btn-primary btn-block">Rechercher</button>
+                        </div>
+                    </div>
+                </form>
+                <br>
+                <hr>
+                <br>
+                <div id="allResult" class="row">
+                </div>
+                <div id="loading" class="alert alert-primary">
+                    <i class="fas fa-spinner fa-pulse"></i> Chargement des données <span id="loadingPoints">...</span>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="row" id="favList">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" tabindex="-1" role="dialog" id="modalProduct">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-8">
+                                <h5>Description</h5>
+                                <p id="description"></p>
+                                <h5>Ingredient</h5>
+                                <ul id="ingredient"></ul>
+                                <h5>Allèrgènes</h5>
+                                <ul id="allergene"></ul>
+                            </div>
+                            <div class="col-4 imageCol">
+                                <img id="imageUrl" />
+                                <img id="imageFrontUrl" />
+                                <img id="imageIngredientUrl" />
+                                <img id="imageNutritionUrl" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="./js/localforage.min.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/barcodes/JsBarcode.ean-upc.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script>
+
+    // Interval permettant de mettre 3 petits points de façon animé pour le chargement
+    setInterval(function() {
+        let previous = $("#loadingPoints").html()
+        if (previous.length >= 3) {
+            $("#loadingPoints").html('.');
+        }
+        else {
+            $("#loadingPoints").html(previous + '.')
+        }
+    }, 500);
+
+    // Favoris en cours
+    var currentFav = {};
+
+    // Formulaire de recherche
+    $("#research").submit(function(e) {
+        e.preventDefault()
+        // On recupere la valeur du formulaire et on appelle la fonction "search"
+        search($("#research input[name='search']").val());
+    })
+
+    var lastSearch = ''; // Recherche courante
+    var lastPage = 0; // Page courante
+    var totalPage = 1; // Nombre total de page
+    var isLoading = false; // En chargement ?
+
+    // Variable constante qui contient le template pour un produit
+    const template = `
+    <div class="">
+    <div class="card">
+    <div style="height: 200px" class="img-card">
+    </div>
+    <div class="card-body">
+    <svg class="barcode">
+
+    </svg>
+    <h5 class="card-title">Card title</h5>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+    <button class="btn btn-default btn-block detail">Détail</button>
+    <i class="material-icons fav">star_border</i>
+    </div>
+    </div>
+    </div>
+    `;
+
+    // Initialisation de l'interface
+    $(function() {
+        // On recupere la valeur "favoris" depuis le LocalForage
+        localforage.getItem('favoris', function(err, value) {
+            if (err) {
+                console.error("Impossible de charger les favoris");
+            }
+            else if (value != null) {
+                // On met a jours les favoris courant
+                currentFav = value;
+                for (var key in value) {
+                    if (value.hasOwnProperty(key)) {
+                        // On parcours les favoris et on les ajoutes en appellant la fonction addFavoris
+                        addFavoris(value[key]);
+                    }
+                }
+            }
+            // On fais une recherche vide pour l'initialisation
+            search('');
+        })
+    })
+
+    // Si on scroll la window, on appelle la fonction checkScroll
+    $(window).scroll(function(e) {
+        checkScroll();
+    });
+
+    function checkScroll() {
+        // Recuperation des information de scroll
+        var scrollTop = $(window).scrollTop();
+        var docHeight = $(document).height();
+        var winHeight = $(window).height();
+        var scrollLeft = (docHeight - winHeight) - scrollTop;
+
+        // Si on ne charge pas, que le scroll est inferieurs a 400px et que notre page n'est pas la derniere
+        if (scrollLeft < 400 && isLoading == false && totalPage > lastPage + 1) {
+
+            console.info("[*] Chargement des elements suivants.");
+
+            // On incremente la page et on charge les donnees
+            lastPage++;
+            load();
+        }
+    }
+
+    // Fonction permettant de faire une recherche
+    function search(research) {
+        // On met la page a 0, on met a jour la valeur de recherche et on vide les resultats actuelles
+        lastPage = 0;
+        lastSearch = research;
+        $("#allResult").empty();
+
+        console.info("[*] Nouvelle recherche.");
+
+        // On charge les donnees
+        load();
+    }
+
+    // Chargement des donnees
+    function load() {
+        // On affiche le chargement et on se met en mode chargement
+        $("#loading").show();
+        isLoading = true;
+        console.info("[*] Lancement de la recherche AJAX.")
+        // Requete ajax avec la page
+        $.ajax({
+            url: 'https://world.openfoodfacts.org/cgi/search.pl',
+            data: {
+                page_size: 20,
+                search_terms: lastSearch,
+                search_simple: 1,
+                action: 'process',
+                json: 1,
+                page: lastPage + 1
+            },
+            success: function(data) {
+                // On met a jours le nombre total de page
+                totalPage = Math.ceil(data.count / 20.0);
+
+                console.info("[*] Création des produits");
+
+                // On parcours tout les produits
+                for (var i = 0; i < data.products.length; i++) {
+                    let product = data.products[i];
+
+                    // On cree notre nouvelle objet
+                    let newObj = $(template);
+
+                    console.info("[*] == " + product.id + " ==");
+
+                    // On met a jours le titre, la description et l'image
+                    newObj.find('.img-card').css('background-image', 'url(' + product.image_url + ')');
+                    newObj.find('.card-title').html(product.product_name_fr);
+                    newObj.find('.card-text').html(product.generic_name_fr);
+
+                    // Si on a un code bar
+                    if (product.id) {
+
+                        console.info("[*] Chargement des informations du code bar.");
+
+                        let code = product.id;
+                        let format = '';
+                        // Si on a un format de 8 ou 13 chiffres
+                        if (product.id.length == 8) {
+                            format = 'ean8'
+                        }
+                        else if (product.id.length == 13) {
+                            format = 'ean13'
+                            // Pour l'ean13 on ne prend que les 12 premiers chiffres
+                            code = code.substring(0, 12);
+                        }
+                        // Si on a un code et un format, on met les attr pour JsBarcode
+                        if (format != '' && code != null) {
+                            newObj.find('.barcode').attr('jsbarcode-format', format);
+                            newObj.find('.barcode').attr('jsbarcode-value', code);
+                            newObj.find('.barcode').attr('jsbarcode-height', 50);
+                        }
+                        else {
+                            // On supprimer le .barcode pour eviter que JsBarcode plante
+                            newObj.find('.barcode').remove();
+                        }
+
+                    }
+                    else {
+                        // On supprimer le .barcode pour eviter que JsBarcode plante
+                        newObj.find('.barcode').remove();
+                    }
+                    // Si notre produit est favorie
+                    if (-1 != $.inArray(product.id, Object.keys(currentFav))) {
+                        // On change l'icon et on met une couleur
+                        newObj.find('.fav').html('star');
+                        newObj.find('.fav').css('color', '#f39c12');
+                    }
+
+                    console.info("[*] Sauvegarde de la donnée API.")
+
+                    // On ajoute les class de taille, de produit
+                    newObj.addClass('product col-3');
+                    // On ajoute la donnee api dans la data "api_data" du produit
+                    newObj.data('api_data', product);
+
+                    console.info("[*] Ajout de l'evenement 'Detail'.")
+
+                    // On ajoute l'evenement du detail
+                    newObj.find('.detail').click(detailButton);
+
+                    // si on clique sur licon fav
+                    newObj.find('.fav').click(function() {
+                        // On recupere la div principal du produit puis la data qu'on y a rentrer
+                        var data = $(this).closest('.product').data('api_data');
+
+                        // Si il est deja favoris
+                        if (-1 != $.inArray(data.id, Object.keys(currentFav))) {
+                            // On le supprime des favoris
+                            delete currentFav[data.id];
+                            // On met a jours le localforage
+                            localforage.setItem('favoris', currentFav, function(err) {
+                                if (err) {
+                                    console.error("Une erreur dans la sauvegarde des favoris c'est produite.", err);
+                                }
+                            });
+                            // On supprime l'element de la liste
+                            $("#favList [data-id='" + data.id + "']").remove();
+                            // On change l'etoile
+                            $(this).html('star_border');
+                            $(this).css('color', '');
+                        }
+                        else {
+                            // On ajoute le favoris
+                            currentFav[data.id] = data;
+
+                            // On met a jours le localforage
+                            localforage.setItem('favoris', currentFav, function(err) {
+                                if (err) {
+                                    console.error("Une erreur dans la sauvegarde des favoris c'est produite.", err);
+                                }
+                            });
+
+                            // On change l'etoile
+                            $(this).html('star');
+                            $(this).css('color', '#f39c12');
+
+                            // On ajoute le favoris
+                            addFavoris(data);
+                        }
+                    })
+
+                    console.info("[*] <= " + product.id + " ==");
+
+                    // On append les resultats dans notre div
+                    $("#allResult").append(newObj);
+                }
+
+                console.info("[*] Initialisation des codes bars.");
+
+                // On initialise les codes bars
+                JsBarcode('.barcode').init();
+                // On cache le chargement
+                $("#loading").hide();
+                isLoading = false;
+                // On refait un checkScroll au cas ou l'utilisateur serait deja en bas
+                checkScroll();
+            }
+        });
+    }
+
+    // Fonction qui ajoute un favoris
+    function addFavoris(product) {
+        // On recupere le template
+        let newObj = $(template);
+
+        // On supprime l'etoile
+        newObj.find('.fav').remove();
+
+        // Le reste est identique au div produit
+        newObj.find('.img-card').css('background-image', 'url(' + product.image_url + ')');
+        newObj.find('.card-title').html(product.product_name_fr);
+        newObj.find('.card-text').html(product.generic_name_fr);
+
+        if (product.id) {
+
+            console.info("[*] Chargement des informations du code bar.");
+
+            let format = 'ean13';
+            if (product.id.length == 8) {
+                format = 'ean8'
+            }
+            newObj.find('.barcode').attr('jsbarcode-format', format);
+            newObj.find('.barcode').attr('jsbarcode-value', product.id);
+            newObj.find('.barcode').attr('jsbarcode-height', 50);
+        }
+        else {
+            newObj.find('.barcode').remove();
+        }
+
+        newObj.attr('data-id', product.id);
+
+        console.info("[*] Sauvegarde de la donnée API.")
+
+        newObj.addClass('product col-12');
+        newObj.data('api_data', product);
+
+        $("#favList").append(newObj);
+
+        newObj.find('button').click(detailButton);
+
+        JsBarcode('.barcode').init();
+    }
+
+    // Gestion de la modal
+    function detailButton() {
+        // Pareil que pour les favoris, on recupere la data
+        var data = $(this).closest('.product').data('api_data');
+
+        // Modification du titre, ajout d'une etoile si c'est un favoris
+        $("#modalProduct .modal-title").html(data.product_name_fr);
+        if (-1 != $.inArray(data.id, Object.keys(currentFav))) {
+            $("#modalProduct .modal-title").append('<i class="material-icons">star</i>');
+        }
+
+        // Recuperatoin des images
+        $("#imageUrl").attr('src', data.image_url);
+        $("#imageFrontUrl").attr('src', data.image_front_url);
+        $("#imageIngredientUrl").attr('src', data.image_nutrition_url);
+        $("#imageNutritionUrl").attr('src', data.image_ingredient_url);
+
+        $("#description").html(data.generic_name_fr);
+
+        // Recuperation des ingredients et allergenes avec un format es6
+        $("#ingredient").html($.map(data.ingredients, (ing) => ('<li>' + ing.text.replace(/_/g, '').replace(/^[a-z]/g, c=>c.toUpperCase()) + '</li>')));
+        $("#allergene").html($.map(data.allergens.split(','), (all) => ('<li>' + all.replace(/^[a-z]/g, c=>c.toUpperCase()) + '</li>')));
+
+        console.info("[*] Affichage des informations détails.");
+
+        // On affiche la modal
+        $("#modalProduct").modal('show');
+    }
+
+    </script>
+
+</body>
+</html>

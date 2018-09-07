@@ -81,6 +81,11 @@
 
     var maDivHtml = $("#maDiv").html();
     $("#maDiv").html("<h2>" + maDivHtml + "</h2>");
+    var maNouvelleDiv = $("<h2>" + maDivHtml + "</h2>");
+    $("#maDiv").append(maNouvelleDiv);
+    maNouvelleDiv.find(".monBoutonDetail").click(function() {
+        console.log("Click");
+    })
 
     $("#googlecestgenial").attr('href', 'http://facebook.com');
 

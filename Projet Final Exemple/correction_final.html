@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Correction Finale</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+    <div class="container-flex content">
+        <div class="row">
+            <div class="col-8">
+                <form id="research">
+                    <div class="form-row">
+                        <div class="col-12">
+                            <label>Recherche</label>
+                            <input class="form-control" name="search" />
+                        </div>
+                        <div class="col-12">
+                            <br>
+                            <input type="submit" class="btn btn-primary btn-block" value="Rechercher" />
+                        </div>
+                    </div>
+                </form>
+                <hr>
+                <div class="row" id="allProducts">
+
+                </div>
+            </div>
+            <div class="col-4">
+            </div>
+        </div>
+    </div>
+    <div class="modal" tabindex="-1" role="dialog" id="modalProduct">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-8">
+                                <h5>Description</h5>
+                                <p id="description"></p>
+                                <h5>Ingredient</h5>
+                                <ul id="ingredient"></ul>
+                                <h5>Allèrgènes</h5>
+                                <ul id="allergene"></ul>
+                            </div>
+                            <div class="col-4 imageCol">
+                                <img id="imageUrl" />
+                                <img id="imageFrontUrl" />
+                                <img id="imageIngredientUrl" />
+                                <img id="imageNutritionUrl" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/barcodes/JsBarcode.ean-upc.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script>
+    const template = `
+    <div class="">
+    <div class="card">
+    <div style="height: 200px" class="img-card">
+    </div>
+    <div class="card-body">
+    <svg class="barcode">
+
+    </svg>
+    <h5 class="card-title">Card title</h5>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+    <button class="btn btn-default btn-block detail">Détail</button>
+    </div>
+    </div>
+    </div>
+    `;
+
+    var lastPage = 1;
+    var lastResearch = '';
+    var totalPage = 1;
+    var isLoading = false;
+
+    $(function() {
+        load();
+    })
+
+    $("#research").submit(function(e) {
+        e.preventDefault();
+        lastResearch = $("#research input[name='search']").val();
+        load();
+    });
+
+    $(window).scroll(function() {
+        var scrollTop = $(window).scrollTop();
+        var docHeight = $(document).height();
+        var winHeight = $(window).height();
+        var scrollLeft = (docHeight - winHeight) - scrollTop;
+
+        // console.log(scrollLeft, isLoading)
+
+        if (scrollLeft < 400 && !isLoading && lastPage + 1 < totalPage) {
+            lastPage ++;
+            load();
+        }
+    })
+
+    function load() {
+        isLoading = true;
+        $.ajax({
+            url: 'https://world.openfoodfacts.org/cgi/search.pl',
+            data: {
+                json: 1,
+                search_simple: 1,
+                action: 'process',
+                page: lastPage,
+                search_terms: lastResearch,
+            },
+            success: function(data) {
+                totalPage = Math.ceil(data.count / 20);
+
+                $.each(data.products, function() {
+                    var newContent = $(template);
+                    newContent.addClass('col-3');
+
+                    newContent.find('.card-title').html(this.product_name_fr);
+                    newContent.find('.card-text').html(this.generic_name_fr);
+                    newContent.find('.img-card').css('background-image', 'url(' + this.image_url + ')');
+
+                    if (this.id) {
+                        // EAN 13
+                        // EAN 8
+                        var format = '';
+                        var code = this.id;
+                        if (code.length == 8) {
+                            format = 'ean8';
+                        }
+                        else if (code.length == 13) {
+                            format = 'ean13';
+                            code = code.substring(0, 12);
+                        }
+                        if (format != '' && code != '') {
+                            newContent.find('.barcode').attr({
+                                'jsbarcode-value': code,
+                                'jsbarcode-format': format
+                            })
+                        }
+                        else {
+                            newContent.find('.barcode').remove();
+                        }
+                    }
+                    else {
+                        newContent.find('.barcode').remove();
+                    }
+
+                    newContent.addClass('product');
+                    newContent.data('api_data', this);
+
+                    newContent.find('.detail').click(detailButton);
+
+                    $("#allProducts").append(newContent);
+                });
+
+                JsBarcode(".barcode").init();
+                isLoading = false;
+            },
+            error: function() {
+                console.error("Impossible de récupérer la donnée.");
+            }
+        })
+    }
+
+    function detailButton() {
+        var data = $(this).closest('.product').data('api_data');
+
+        $("#modalProduct .modal-title").html(data.product_name_fr);
+        $("#description").html(data.generic_name_fr);
+        $("#ingredient").html($.map(data.ingredients, (ing) => ('<li>' + ing.text + '</li>')));
+
+        $("#allergene").empty();
+
+        var all = data.allergens.split(',');
+        $.each(all, function() {
+            $("#allergene").append('<li>' + this + '</li>');
+        });
+
+        $("#imageUrl").attr('src', data.image_url);
+        $("#imageFrontUrl").attr('src', data.image_front_url);
+        $("#imageIngredientUrl").attr('src', data.image_nutrition_url);
+        $("#imageNutritionUrl").attr('src', data.image_ingredient_url);
+
+        $("#modalProduct").modal('show');
+    }
+
+    </script>
+</body>
+</html>
